@@ -1,0 +1,40 @@
+version: "3"
+
+services:
+  app:
+    image: hitalos/laravel:latest
+    ports:
+    - 8080:80
+    volumes:
+    - ./:/var/www
+    links:
+    - db
+    environment:
+      #db
+      DB_HOST: db
+      DB_DATABASE: dbname
+      DB_USERNAME: username
+      DB_PASSWORD: p455w0rd
+      DB_CONNECTION: mysql
+      #mailhog
+      MAIL_HOST: mailhog
+      MAIL_PORT: 1025
+      MAIL_DRIVER: smtp
+      #app
+      APP_PORT: 8080
+  db:
+    image: mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: dbname
+      MYSQL_USER: username
+      MYSQL_PASSWORD: p455w0rd
+  adminer:
+    image: adminer
+    ports:
+    - 8081:8080
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+    - 8025:8025
+    - 1025:1025
