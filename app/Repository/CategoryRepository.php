@@ -19,6 +19,11 @@ class CategoryRepository
         return Category::where('user_id', $id)->where('is_deleted', 0)->get(['id', 'name', 'type', 'icon']);
     }
 
+    public static function getActiveByUserAndType(int $id, int $type)
+    {
+        return Category::where('user_id', $id)->where('is_deleted', 0)->where('type', $type)->get(['id', 'name', 'type', 'icon']);
+    }
+
     public static function getByIdAndUserId($categoryId, $userId)
     {
         return Category::where('user_id', $userId)->where('id', $categoryId)->get();

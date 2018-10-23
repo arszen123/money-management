@@ -4,6 +4,11 @@ namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\Model\Category
+ *
+ * @mixin \Eloquent
+ */
 class Category extends Model
 {
     protected $table = 'category';

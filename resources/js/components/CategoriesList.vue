@@ -71,11 +71,9 @@
                     } else {
                         tempExpenseCategories.push(category)
                     }
-                    console.log(category);
                 }
                 this.expenseCategories = tempExpenseCategories
                 this.incomeCategories = tempIncomeCategories
-                console.log(categories)
             }
         }
     }

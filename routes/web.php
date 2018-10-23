@@ -18,6 +18,8 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
+//Route::get('/home', 'HomeController@index')->name('home');
 Route::resource('/category', 'CategoryController')->name('index', 'category.index');
 Route::resource('/wallet', 'WalletController')->name('index', 'wallet.index');
+Route::resource('/', 'WalletController')->name('index', 'wallet.index');
+Route::resource('/budget', 'BudgetController')->name('index', 'budget.index');

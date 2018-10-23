@@ -4,6 +4,11 @@ namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\Model\Wallet
+ *
+ * @mixin \Eloquent
+ */
 class Wallet extends Model
 {
     protected $table = 'wallet';

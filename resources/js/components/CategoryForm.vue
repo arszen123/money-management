@@ -38,7 +38,7 @@
                 let path = '/category';
                 let request = null
                 if (this.categoryId == null) {
-                    request = axios.post(path + '/' + this.categoryId, this.category)
+                    request = axios.post(path, this.category)
                 } else {
                     request = axios.put(path + '/' + this.categoryId, this.category)
                 }

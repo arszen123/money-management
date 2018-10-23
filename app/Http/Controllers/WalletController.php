@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Model\Budget;
 use App\Model\Wallet;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
@@ -24,8 +25,10 @@ class WalletController extends Controller
             $walletData['user_id'] = \Auth::id();
             $wallet = Wallet::create($walletData);
         }
-
-        return view('wallet.index', ['wallet' => $wallet]);
+        $budgets = Budget::where('user_id', \Auth::id())->get([
+            'id', 'name', 'from', 'to', 'current_balance', 'starting_balance'
+        ]);
+        return view('wallet.index', ['wallet' => $wallet, 'budgets' => $budgets]);
     }
 
     /**

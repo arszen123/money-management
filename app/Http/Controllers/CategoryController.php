@@ -26,7 +26,13 @@ class CategoryController extends Controller
      */
     public function index(Request $request)
     {
-        $categories = CategoryRepository::getActiveByUser(Auth::id());
+        $type = $request->input('type');
+        $categories = [];
+        if ($type) {
+            $categories = CategoryRepository::getActiveByUserAndType(Auth::id(), $type);
+        } else {
+            $categories = CategoryRepository::getActiveByUser(Auth::id());
+        }
         $result = view('category.index',['categories' => $categories]);
         if ($request->ajax()) {
             $result = ['categories' => $categories];

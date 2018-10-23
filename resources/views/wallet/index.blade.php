@@ -24,8 +24,8 @@
                 <div class="card">
                     <div class="card-header">Budgets</div>
 
-                    <div class="card-body">
-                        <budgets-view />
+                    <div class="card-body" style="padding: 0">
+                        <budgets-view :budgets='@json($budgets)'/>
                     </div>
                 </div>
             </div>
