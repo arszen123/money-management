@@ -12,18 +12,49 @@
 
 namespace App\Model{
 /**
- * App\Model\Category
+ * App\Model\Wallet
  *
+ * @mixin \Eloquent
  */
-	class Category extends \Eloquent {}
+	class Wallet extends \Eloquent {}
 }
 
-namespace App{
+namespace App\Model{
 /**
- * App\User
+ * App\Model\Budget
  *
+ * @mixin \Eloquent
+ */
+	class Budget extends \Eloquent {}
+}
+
+namespace App\Model{
+/**
+ * App\Model\BudgetCategories
+ *
+ */
+	class BudgetCategories extends \Eloquent {}
+}
+
+namespace App\Model{
+/**
+ * Class User
+ *
+ * @package App\Model
+ * @property-read int $id
+ * @property string $email
+ * @property string $name
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection|\Illuminate\Notifications\DatabaseNotification[] $notifications
  */
 	class User extends \Eloquent {}
+}
+
+namespace App\Model{
+/**
+ * App\Model\Category
+ *
+ * @mixin \Eloquent
+ */
+	class Category extends \Eloquent {}
 }
 

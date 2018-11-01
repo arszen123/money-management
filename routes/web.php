@@ -23,3 +23,7 @@ Route::resource('/category', 'CategoryController')->name('index', 'category.inde
 Route::resource('/wallet', 'WalletController')->name('index', 'wallet.index');
 Route::resource('/', 'WalletController')->name('index', 'wallet.index');
 Route::resource('/budget', 'BudgetController')->name('index', 'budget.index');
+Route::resource('/transaction', 'TransactionController')->name('index', 'transaction.index');
+Route::get('/transaction/budget/{budgetId}', 'TransactionController@transactionsByBudgetId')->name('transaction.budget')->where('budgetId', '[0-9]+');
+Route::get('/transaction/category/{categoryId}', 'TransactionController@transactionsByCategoryId')->name('transaction.category')->where('categoryId', '[0-9]+');
+Route::get('/transaction/tag/{categoryId}', 'TransactionController@transactionsByTag')->name('transaction.category')->where('tag', '[a-zA-Z0-9]+');

@@ -6,7 +6,7 @@
  * Time: 9:23 PM
  */
 
-class BudgetSeeder
+class BudgetSeeder extends \Illuminate\Database\Seeder
 {
 
     public function run()

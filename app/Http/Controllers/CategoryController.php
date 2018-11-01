@@ -7,6 +7,7 @@ use App\Model\Category;
 use App\Repository\CategoryRepository;
 use Illuminate\Http\Request;
 use App\Http\Requests\Category as CategoryRequest;
+use App\Http\Requests\CategoryUpdate as CategoryUpdateRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
 
@@ -15,8 +16,8 @@ class CategoryController extends Controller
 
     public function __construct()
     {
-        //$this->middleware('auth');
-        $this->middleware(Ajax::class, ['except' => ['index']]);
+        $this->middleware('auth');
+        $this->middleware(Ajax::class)->except('index');
     }
 
     /**
@@ -29,9 +30,9 @@ class CategoryController extends Controller
         $type = $request->input('type');
         $categories = [];
         if ($type) {
-            $categories = CategoryRepository::getActiveByUserAndType(Auth::id(), $type);
+            $categories = CategoryRepository::getActiveByUserAndType(Auth::user(), $type);
         } else {
-            $categories = CategoryRepository::getActiveByUser(Auth::id());
+            $categories = CategoryRepository::getActiveByUser(Auth::user());
         }
         $result = view('category.index',['categories' => $categories]);
         if ($request->ajax()) {
@@ -59,10 +60,9 @@ class CategoryController extends Controller
     public function store(CategoryRequest $request)
     {
         $categoryData = $request->validated();
-        $categoryData['user_id'] = Auth::id();
-        $category = \App\Model\Category::create($categoryData);
+        $success = CategoryRepository::storeUserCategory(Auth::user(), $categoryData);
 
-        return ['success' => (boolean)$category];
+        return ['success' => $success];
     }
 
     /**
@@ -73,8 +73,8 @@ class CategoryController extends Controller
      */
     public function show($id)
     {
-        $category = CategoryRepository::getByIdAndUserId($id, Auth::id());
-        return $category[0];
+        $category = CategoryRepository::getUserCategory(Auth::user(), $id);
+        return (array)$category[0];
     }
 
     /**
@@ -85,7 +85,6 @@ class CategoryController extends Controller
      */
     public function edit(CategoryRequest $request, $id)
     {
-//        $categoryData = $request->validated();
     }
 
     /**
@@ -95,11 +94,9 @@ class CategoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(CategoryRequest $request, $id)
+    public function update(CategoryUpdateRequest $request, $id)
     {
-        /** @var Category $category */
-        $category = CategoryRepository::getByIdAndUserId($id, Auth::id())[0];
-        $category->update($request->validated());
+        CategoryRepository::updateUserCategory(Auth::user(), $id, $request->validated());
     }
 
     /**
@@ -110,8 +107,6 @@ class CategoryController extends Controller
      */
     public function destroy($id)
     {
-        /** @var Category $category */
-        $category = CategoryRepository::getByIdAndUserId($id, Auth::id())[0];
-        $category->update(['is_deleted' => true]);
+        CategoryRepository::deleteUserCategory(Auth::user(), $id);
     }
 }

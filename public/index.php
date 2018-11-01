@@ -49,6 +49,11 @@ $app = require_once __DIR__.'/../bootstrap/app.php';
 |
 */
 
+function calcPercent($starting, $current)
+{
+    return round(($starting-$current)*100/$starting,2);
+}
+
 $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 
 $response = $kernel->handle(

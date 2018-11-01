@@ -13,7 +13,7 @@ class CreateBudgetCategoriesTable extends Migration
      */
     public function up()
     {
-        Schema::create('budget_categories', function (Blueprint $table) {
+        Schema::create('budget_category', function (Blueprint $table) {
             $table->integer('budget_id');
             $table->integer('category_id');
         });
@@ -26,6 +26,6 @@ class CreateBudgetCategoriesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('budget_categories');
+        Schema::dropIfExists('budget_category');
     }
 }

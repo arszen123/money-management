@@ -2,13 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Middleware\Ajax;
 use App\Http\Requests\Budget as BudgetRequest;
-use App\Model\Budget;
-use App\Model\BudgetCategories;
-use Illuminate\Http\Request;
+use App\Repository\BudgetRepository;
 
 class BudgetController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware(Ajax::class)->except('index');
+        $this->middleware('auth');
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -16,10 +22,12 @@ class BudgetController extends Controller
      */
     public function index()
     {
-        $budgets = Budget::where('user_id', \Auth::id())->get([
-            'id', 'name', 'from', 'to', 'current_balance', 'starting_balance'
-        ]);
-        return ['success' => true, 'data' => $budgets->toArray()];
+        $budgets = BudgetRepository::getUserBudgets(\Auth::user());
+        $response = ['success' => true, 'data' => $budgets];
+        if (!\Request::ajax()) {
+            $response = view('budget.index', ['budgets' => $budgets]);
+        }
+        return $response;
     }
 
     /**
@@ -40,19 +48,8 @@ class BudgetController extends Controller
      */
     public function store(BudgetRequest $request)
     {
-        $budget = $request->validated();
-        $budget['user_id'] = \Auth::id();
-        $budget['current_balance'] = $budget['starting_balance'];
-        $budgetCategories = $budget['categories'];
-        $createdBudget = Budget::create($budget);
-
-        foreach ($budgetCategories as $budgetCategoryId) {
-            BudgetCategories::create([
-                'budget_id' => $createdBudget->id,
-                'category_id' => $budgetCategoryId,
-            ]);
-        }
-        return ['success' => true, 'data' => $createdBudget];
+        $budget = BudgetRepository::storeUserBudget(\Auth::user(), $request->validated());
+        return ['success' => true, 'data' => $budget];
     }
 
     /**
@@ -63,11 +60,7 @@ class BudgetController extends Controller
      */
     public function show($id)
     {
-        $budget = Budget::where('user_id', \Auth::id())->where('id', $id)->get([
-            'id', 'name', 'from', 'to', 'starting_balance'
-        ]);
-        $result = $budget->get(0)->toArray();
-        $result['categories'] = BudgetCategories::where('budget_id', $result['id'])->pluck('category_id')->toArray();
+        $result = BudgetRepository::getUserBudgetsWithCategories(\Auth::user(), $id);
         return ['success' => true, 'budget' => $result];
     }
 
@@ -92,18 +85,7 @@ class BudgetController extends Controller
     public function update(BudgetRequest $request, $id)
     {
         $budget = $request->validated();
-        $budgetCategories = $budget['categories'];
-        unset($budget['categories']);
-        $success = Budget::where('user_id', \Auth::id())->where('id', $id)->update($budget);
-        BudgetCategories::where('budget_id', $id)->delete();
-        if (is_array($budgetCategories)) {
-            foreach ($budgetCategories as $budgetCategoryId) {
-                BudgetCategories::create([
-                    'budget_id' => $id,
-                    'category_id' => $budgetCategoryId,
-                ]);
-            }
-        }
+        $success = BudgetRepository::updateUserBudget(\Auth::user(), array_merge($budget, ['id' => $id]));
         return ['success' => $success];
     }
 

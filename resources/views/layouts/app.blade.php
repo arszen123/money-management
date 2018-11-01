@@ -52,6 +52,16 @@
                                 </a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link" href="{{ route('budget.index') }}">
+                                    {{ __('Budgets') }}
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('transaction.index') }}">
+                                    {{ __('Transactions') }}
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" href="{{ route('category.index') }}">
                                     {{ __('Categories') }}
                                 </a>

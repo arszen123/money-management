@@ -12,6 +12,7 @@
         <div class="card-body">
             <component :is="selectedComponent.component" :categoryId="categoryId"/>
         </div>
+        <notifications group="notification" />
     </div>
 </template>
 

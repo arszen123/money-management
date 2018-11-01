@@ -1,20 +1,24 @@
 <template>
-    <form v-on:submit.prevent="saveBudget">
+    <form v-on:submit.prevent="saveBudget" >
         <div class="form-group">
             <label for="budget-name">Budget name:</label>
             <input id="budget-name" name="name" class="form-control" v-model="budget.name">
+            <div v-if="errors.name !== null" class="invalid-feedback">{{ errors.name }}</div>
         </div>
         <div class="form-group">
             <label for="budget-from">Date from:</label>
             <input id="budget-from" name="from" type="date" class="form-control" v-model="budget.from">
+            <div v-if="errors.from !== null" class="invalid-feedback">{{ errors.from }}</div>
         </div>
         <div class="form-group">
             <label for="budget-to">Date to:</label>
             <input id="budget-to" name="to" type="date" class="form-control" v-model="budget.to">
+            <div v-if="errors.to !== null" class="invalid-feedback">{{ errors.to }}</div>
         </div>
         <div class="form-group">
             <label for="budget-starting-balance">Balance:</label>
             <input id="budget-starting-balance" name="starting_balance" type="number" class="form-control" v-model="budget.starting_balance">
+            <div v-if="errors.starting_balance !== null" class="invalid-feedback">{{ errors.starting_balance }}</div>
         </div>
         <div class="form-group">
             <label>Categories:</label>
@@ -41,8 +45,15 @@
                 name: '',
                 from: null,
                 to: null,
-                starting_balance: 0,
+                starting_balance: null,
                 categories: []
+            },
+            errors: {
+                name: null,
+                from: null,
+                to: null,
+                starting_balance: null,
+                categories: null,
             },
             categories: []
         }),
@@ -50,8 +61,8 @@
             if (this.categoryId) {
                 this.getBudget(this.categoryId)
             } else {
-                this.budget.from = Carbon.now().format();
-                this.budget.to = Carbon.now().addMonths(1).format();
+                this.budget.from = Carbon.now().addMonths(1).format();
+                this.budget.to = Carbon.now().addMonths(2).format();
             }
             this.getCategories()
         },
@@ -63,8 +74,26 @@
                 } else {
                     result = axios.post('/budget', this.budget)
                 }
-                result.then(value => {
-                    console.log(value.data)
+                result.then(() => {
+                    this.$parent.goTo('root')
+                    this.$notify({
+                        group: 'notification',
+                        title: 'Saved!',
+                        text: 'Budget saved successfully!',
+                        type: 'success'
+                    });
+                }).catch(reason => {
+                    let errors = reason.response.data.errors
+                    this.errors = {
+                        name: null,
+                        from: null,
+                        to: null,
+                        starting_balance: null,
+                        categories: null,
+                    };
+                    for (let error in errors) {
+                        this.errors[error] = errors[error][0];
+                    }
                 })
             },
             getBudget(id) {
@@ -83,5 +112,7 @@
 </script>
 
 <style scoped>
-
+    .invalid-feedback {
+        display: inherit;
+    }
 </style>

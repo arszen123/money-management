@@ -21,7 +21,7 @@ export default class Carbon {
 
     static format (format) {
         let date = this.__date
-        return date.getFullYear() + '-' + (date.getMonth() >= 10 ? date.getMonth() : `0${date.getMonth()}`) + '-' + date.getDate();
+        return date.getFullYear() + '-' + (date.getMonth() >= 10 ? date.getMonth() : `0${date.getMonth()}`) + '-' + (date.getDate() >= 10 ? date.getDate() : `0${date.getDate()}`);
     }
     static toString() {
         return this.format()

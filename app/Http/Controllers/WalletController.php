@@ -2,14 +2,24 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Middleware\Ajax;
 use App\Model\Budget;
 use App\Model\Wallet;
+use App\Repository\BudgetRepository;
+use App\Repository\WalletRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use App\Http\Requests\Wallet as WalletRequest;
 
 class WalletController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware(Ajax::class)->except('index');
+        $this->middleware('auth');
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -17,18 +27,9 @@ class WalletController extends Controller
      */
     public function index()
     {
-        /** @var Collection $wallet */
-        $wallet  = Wallet::where('user_id', \Auth::id())->get();
-        $wallet = $wallet->get(0);
-        if (!$wallet) {
-            $walletData = ['name' => 'main Wallet', 'balance' => 0];
-            $walletData['user_id'] = \Auth::id();
-            $wallet = Wallet::create($walletData);
-        }
-        $budgets = Budget::where('user_id', \Auth::id())->get([
-            'id', 'name', 'from', 'to', 'current_balance', 'starting_balance'
-        ]);
-        return view('wallet.index', ['wallet' => $wallet, 'budgets' => $budgets]);
+        $wallets = WalletRepository::getUserWallets(\Auth::user());
+        $budgets = BudgetRepository::getUserBudgets(\Auth::user());
+        return view('wallet.index', ['wallets' => $wallets, 'budgets' => $budgets]);
     }
 
     /**
@@ -49,13 +50,7 @@ class WalletController extends Controller
      */
     public function store(WalletRequest $request)
     {
-        $wallet  = null;
-        if (!Wallet::where('user_id', \Auth::id())->exists()) {
-            $walletData = $request->validated();
-            $walletData['user_id'] = \Auth::id();
-            $wallet = Wallet::create($walletData);
-        }
-        return ['success' => (boolean)$wallet];
+        //
     }
 
     /**
@@ -66,7 +61,8 @@ class WalletController extends Controller
      */
     public function show($id)
     {
-        return ['success' => Wallet::where('user_id', \Auth::id())->where('id', $id)->get()[0]];
+        $wallet = WalletRepository::getUserWallet(\Auth::user(), $id);
+        return ['success' => true, 'data' => $wallet];
     }
 
     /**
@@ -89,8 +85,7 @@ class WalletController extends Controller
      */
     public function update(WalletRequest $request, $id)
     {
-        $wallet = Wallet::where('user_id', \Auth::id())->where('id', $id)->get()[0];
-        $success = $wallet->update($request->validated());
+        $success = WalletRepository::updateUserWallet(\Auth::user(), $id, $request->validated());
         return ['success' => $success];
     }
 
@@ -102,7 +97,7 @@ class WalletController extends Controller
      */
     public function destroy($id)
     {
-        $wallet = Wallet::where('user_id', \Auth::id())->where('id', $id)->get()[0];
-        return ['success' => $wallet->delete()];
+//        $success = WalletRepository::deleteUserWallet(\Auth::user(), $id);
+//        return ['success' => $success];
     }
 }

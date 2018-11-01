@@ -1,6 +1,8 @@
 <template>
     <ul class="list-group">
-        <li v-for="budget in budgets" :class="'list-group-item '+(categoryId === budget.id ? 'active' : '')" v-on:click.prevent="select(budget.id)">{{ budget.name }}</li>
+        <li v-for="budget in budgets" :class="'list-group-item '+(categoryId === budget.id ? 'active' : '')" v-on:click.prevent="select(budget.id)">
+            {{ budget.name }}
+        </li>
     </ul>
 </template>
 
@@ -14,11 +16,7 @@
             budgets: []
         }),
         created() {
-            if (typeof this.$parent.budgets !== 'undefined') {
-                this.budgets = this.$parent.budgets;
-            } else {
-                this.fetchBudgets()
-            }
+            this.fetchBudgets()
         },
         methods: {
             fetchBudgets() {

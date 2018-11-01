@@ -5,23 +5,24 @@
                 <div class="card-header">Categories income</div>
 
                 <div class="card-body">
-                    <category-list :on-click="selectCategory" :categories="incomeCategories"/>
+                    <category-list :on-click="selectCategory" :categoryId="categoryId" :categories="incomeCategories"/>
                 </div>
             </div>
             <div class="card">
                 <div class="card-header">Categories expense</div>
 
                 <div class="card-body">
-                    <category-list :on-click="selectCategory" :categories="expenseCategories"/>
+                    <category-list :on-click="selectCategory" :categoryId="categoryId" :categories="expenseCategories"/>
                 </div>
             </div>
             <div class="card">
                 <div class="card-header">Categories</div>
 
                 <div class="card-body">
-                    <category-form :category-id="categoryId" :on-save="onSave" :on-delete="onDelete"/>
+                    <category-form :category-id="categoryId" @save="onSave()" @delete="onDelete()"/>
                 </div>
             </div>
+            <notifications group="notification" />
         </div>
     </div>
 </template>
