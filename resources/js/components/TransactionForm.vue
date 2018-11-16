@@ -41,6 +41,7 @@
             </form>
             <div slot="footer" class="form-footer">
                 <button class="btn btn-outline-success" style="left: 0;" v-on:click="saveTransaction">Create transaction</button>
+                <button class="btn btn-outline-danger" v-on:click="deleteTransaction">Delete</button>
                 <button class="btn btn-outline-danger" v-on:click="showModal = !showModal">Cancel</button>
             </div>
         </modal>
@@ -125,6 +126,28 @@
                     for (let error in errors) {
                         this.errors[error] = errors[error][0];
                     }
+                })
+            },
+            deleteTransaction() {
+                axios.delete(`/transaction/${this.transactionToEdit.id}`)
+                .then(value => {
+                    if (value.data.success) {
+                        this.showModal = !this.showModal;
+                        this.$notify({
+                            group: 'notification',
+                            title: 'Deleted!',
+                            text: 'Transaction deleted successfully!',
+                            type: 'success'
+                        });
+                    }
+                }).catch(reason => {
+                    this.showModal = !this.showModal;
+                    this.$notify({
+                        group: 'notification',
+                        title: 'Failed!',
+                        text: 'Transaction deletions failed!',
+                        type: 'error'
+                    });
                 })
             }
         },

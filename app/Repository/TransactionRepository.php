@@ -125,7 +125,13 @@ class TransactionRepository
 
     public static function deleteTransaction(User $user, $transactionId)
     {
-
+        $transaction = self::getTransactionAmount($transactionId);
+        WalletRepository::updateUserWalletWithBalance($user, $transaction['wallet_id'], $transaction['amount']);
+        return \DB::delete('DELETE FROM `transaction` WHERE user_id = :user_id AND id = :transaction_id',
+            [
+                'user_id' => $user->id,
+                'transaction_id' => $transactionId
+            ]);
     }
 
     private static function prepareTransactionData($transactionData)
@@ -137,6 +143,15 @@ class TransactionRepository
         $transactionData['updated_at'] = $transactionData['date'] ?? Carbon::now();
         unset($transactionData['type'], $transactionData['date']);
         return $transactionData;
+    }
+
+    public static function getTransactionAmount($transactionId)
+    {
+        $balance = \DB::select('SELECT wallet_id, CASE WHEN c.type = 1 THEN amount*-1 ELSE amount END as amount FROM `transaction` t LEFT JOIN category c ON t.category_id = c.id WHERE t.id = :transaction_id',
+            [
+                'transaction_id' => $transactionId
+            ]);
+        return isset($balance[0]) ? (array)$balance[0] : [];
     }
 
     public static function getTransactions(User $user, $toDisplay = null)
@@ -180,7 +195,7 @@ class TransactionRepository
         $tag,
         $data
     ) {
-        $sql = 'select c.name as categoryName, c.type as type, t.* from `transaction` t INNER JOIN category c ON t.category_id = c.id WHERE t.user_id = :user_id AND (t.tag = :tag1 OR t.tag LIKE :tag2 OR t.tag LIKE :tag3 OR t.tag LIKE :tag4)';
+        $sql = 'select c.name as categoryName, c.type as type, t.* from (SELECT * FROM `transaction` t WHERE t.tag = :tag1 OR t.tag LIKE :tag2 OR t.tag LIKE :tag3 OR t.tag LIKE :tag4) t INNER JOIN category c ON t.category_id = c.id WHERE t.user_id = :user_id';
         self::addCreatedAt($sql, 't', $data);
         $sql .= ' ORDER BY t.created_at DESC';
         return \DB::select($sql, array_merge([
@@ -195,11 +210,37 @@ class TransactionRepository
     private static function addCreatedAt(&$sql, $table, $data)
     {
         if (isset($data['from'])) {
-            $sql .= " AND ${table}.created_at >= :from";
+            $sql .= " AND ${table}.created_at >= " . ($data['prepare'] ? "'" . $data['from'] . "'" : ':from');
         }
         if (isset($data['to'])) {
-            $sql .= " AND ${table}.created_at <= :to";
+            $sql .= " AND ${table}.created_at <= " . ($data['prepare'] ? "'" . $data['to'] . "'" : ':to');
         }
+    }
+
+    public static function getAmountByCategory(User $user, $data)
+    {
+        $sql = 'select t.category_id as id, SUM(t.amount) as amount from `transaction` t INNER JOIN category c ON t.category_id = c.id WHERE t.user_id = :user_id';
+        self::addCreatedAt($sql, 't', $data);
+        $sql .=  ' GROUP BY t.category_id';
+        return json_decode(json_encode(\DB::select($sql, array_merge([
+            'user_id' => $user->id
+        ], $data))), true);
+    }
+
+
+    public static function getAmountByCategory1(User $user, $data, $type = Category::TYPE_EXPENSE)
+    {
+        $data['prepare'] = true;
+        $sql1 = "select c.name, SUM(t.amount) as amount from `transaction` t INNER JOIN category c ON t.category_id = c.id WHERE t.user_id = {$user->id} AND c.type = ${type} ";
+        self::addCreatedAt($sql1, 't', $data);
+        $sql1 .= ' GROUP By c.name';
+        $sql2 = "select SUM(t.amount) as amount from `transaction` t INNER JOIN category c ON t.category_id = c.id WHERE t.user_id = {$user->id} AND c.type = ${type} ";
+        self::addCreatedAt($sql2, 't', $data);
+        $sql = "SELECT CONCAT(c.name, ' (', c.amount, ')') as label, ROUND(c.amount*100/b.amount) as value from
+                (${sql1}) as c,
+                (${sql2}) as b
+                GROUP BY c.name, c.amount, b.amount";
+        return json_decode(json_encode(\DB::select($sql)), true);
     }
 
 }

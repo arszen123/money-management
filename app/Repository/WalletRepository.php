@@ -69,4 +69,16 @@ class WalletRepository
         );
     }
 
+
+    public static function updateUserWalletWithBalance(User $user, $walletId, $walletBalance)
+    {
+        $walletData['user_id'] = $user->id;
+        $walletData['id'] = $walletId;
+        $walletData['balance'] = $walletBalance;
+        return \DB::update(
+            'update wallet set `balance`=`balance`+ :balance where id = :id AND user_id=:user_id',
+            $walletData
+        );
+    }
+
 }

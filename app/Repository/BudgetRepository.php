@@ -75,10 +75,10 @@ class BudgetRepository
     public static function getUserBudgets(User $user, $id = null)
     {
         $bindings['user_id'] = $user->id;
-        $query = 'SELECT id, `name`, `from`, `to`, current_balance, starting_balance FROM budget WHERE user_id = :user_id';
+        $query = 'SELECT budget.id, `name`, `from`, `to`, CASE WHEN bcb.amount IS NOT NULL THEN (starting_balance - bcb.amount) ELSE starting_balance END as current_balance , starting_balance FROM budget LEFT JOIN (SELECT b.id, SUM(t.amount) as amount from `transaction` t INNER JOIN budget_category bc ON bc.category_id = t.category_id LEFT JOIN category c ON t.category_id = c.id LEFT JOIN budget b ON b.id = bc.budget_id WHERE t.created_at BETWEEN b.from AND b.to GROUP BY b.id) bcb ON bcb.id = budget.id WHERE user_id = :user_id';
         if ($id !== null) {
             $bindings['budget_id'] = $id;
-            $query .= ' AND id = :budget_id';
+            $query .= ' AND budget.id = :budget_id';
         }
 
         $budgets =  DB::select(
@@ -165,20 +165,14 @@ class BudgetRepository
 
     private static function getTransactionsAmount(User $user, $data)
     {
-        $amount = 0;
-        foreach ($data['categories'] as $category) {
-            $subAmount = DB::select(
-                'SELECT sum(amount) as amount FROM `transaction` WHERE category_id = :category_id AND created_at BETWEEN :from AND :to AND user_id=:user_id',
-                ['category_id' => $category, 'from' => $data['from'], 'to' => $data['to'], 'user_id' => $user->id]
-            );
-            $amount += $subAmount[0]->amount;
+        $userID = $user->id;
+        $categories = implode(', ', $data['categories']);
+        if (empty($data['categories'])) {
+            return 0;
         }
-        return $amount;
-//        Baszik mukodni. Es nem tudom miert.
-//        $subAmount = DB::select(
-//            'SELECT sum(amount) as amount FROM `transaction` WHERE category_id IN (:category_ids) AND created_at BETWEEN :from AND :to AND user_id=:user_id',
-//            ['category_ids' => implode(',', $data['categories']), 'from' => $data['from'], 'to' => $data['to'], 'user_id' => $user->id]
-//        );
+        $sql = "SELECT sum(amount) as amount FROM `transaction` WHERE category_id IN (${categories}) AND created_at BETWEEN '${data['from']}' AND '${data['to']}' AND user_id=${userID}";
+        $amount = DB::select($sql);
+        return $amount[0]->amount;
     }
 
 }

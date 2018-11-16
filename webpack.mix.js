@@ -15,4 +15,5 @@ mix.js('resources/js/app.js', 'public/js')
     .js('resources/js/budget.js', 'public/js')
     .js('resources/js/saving.js', 'public/js')
     .js('resources/js/transaction.js', 'public/js')
+    .js('resources/js/chart.js', 'public/js')
     .sass('resources/sass/app.scss', 'public/css');

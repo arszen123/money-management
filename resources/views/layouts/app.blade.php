@@ -62,6 +62,11 @@
                                 </a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link" href="{{ route('transaction.chart') }}">
+                                    {{ __('Charts') }}
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" href="{{ route('category.index') }}">
                                     {{ __('Categories') }}
                                 </a>

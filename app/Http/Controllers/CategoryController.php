@@ -74,7 +74,7 @@ class CategoryController extends Controller
     public function show($id)
     {
         $category = CategoryRepository::getUserCategory(Auth::user(), $id);
-        return (array)$category[0];
+        return (array)$category;
     }
 
     /**

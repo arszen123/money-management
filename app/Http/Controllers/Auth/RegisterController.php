@@ -70,5 +70,32 @@ class RegisterController extends Controller
             'password' => Hash::make($data['password']),
         ]);
         WalletRepository::storeUserWallet($user, ['name' => 'Main Wallet', 'balance' => 0]);
+
+        \DB::insert("
+            INSERT INTO `category` (`user_id`, `name`, `type`, `icon`, `is_deleted`) VALUES
+                ({$user->id},	'Food',	2,	'food',	0),
+                ({$user->id},	'Transportation',	2,	'transportation',	0),
+                ({$user->id},	'Entertainment',	2,	'entertainment',	0),
+                ({$user->id},	'Education',	2,	'Education',	0),
+                ({$user->id},	'Personal Care',	2,	'personal_care',	0),
+                ({$user->id},	'Health & Fitness (was healthcare)',	2,	'health',	0),
+                ({$user->id},	'Kids',	2,	'Education',	0),
+                ({$user->id},	'Gifts & Donations',	2,	'gift',	0),
+                ({$user->id},	'Bills & Utilities',	2,	'bill',	0),
+                ({$user->id},	'Fees & Charges',	2,	'fee',	0),
+                ({$user->id},	'Business Services',	2,	'business',	0),
+                ({$user->id},	'Taxes',	2,	'taxes',	0);
+        ");
+        \DB::insert("
+            INSERT INTO `category` (`user_id`, `name`, `type`, `icon`, `is_deleted`) VALUES
+                ({$user->id},	'Paycheck',	1,	'Paycheck',	0),
+                ({$user->id},	'Investment',	1,	'Investment',	0),
+                ({$user->id},	'Returned Purchase',	1,	'returned_purchase',	0),
+                ({$user->id},	'Bonus',	1,	'bonus',	0),
+                ({$user->id},	'Interest Income',	1,	'interest_income',	0),
+                ({$user->id},	'Reimbursement',	1,	'reimbursment',	0),
+                ({$user->id},	'Rental Income',	1,	'rent',	0);
+        ");
+        return $user;
     }
 }

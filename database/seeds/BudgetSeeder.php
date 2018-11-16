@@ -18,20 +18,19 @@ class BudgetSeeder extends \Illuminate\Database\Seeder
     private function insertBudgets()
     {
         DB::insert("
-            INSERT INTO `budget` (`id`, `name`, `starting_balance`, `current_balance`, `from`, `to`, `user_id`) VALUES
-            (1,	'Food',	'60000',	'30000',	'2018-09-21',	'2018-10-21',	1),
-            (2,	'Transportation',	'15000',	'15000',	'2018-09-21',	'2018-10-21',	1),
-            (3,	'Test',	'100000',	'100000',	'2018-09-21',	'2018-10-21',	1);
+            INSERT INTO `budget` (`name`, `starting_balance`, `current_balance`, `from`, `to`, `user_id`) VALUES
+            ('Food',	'30000',	'30000',	'2018-11-01',	'2018-11-30',	1),
+            ('Transportation',	'10000',	'10000',	'2018-11-01',	'2018-11-30',	1),
+            ('Entertainment',	'15000',	'15000',	'2018-11-01',	'2018-11-30',	1),
+            ('Food',	'30000',	'30000',	'2018-10-01',	'2018-10-31',	1),
+            ('Transportation',	'10000',	'10000',	'2018-10-01',	'2018-10-31',	1),
+            ('Entertainment',	'15000',	'15000',	'2018-10-01',	'2018-10-31',	1);
         ");
     }
 
     private function insertBudgetCategoires()
     {
-        DB::insert('
-            INSERT INTO `budget_categories` (`budget_id`, `category_id`) VALUES
-            (2,	2),
-            (1,	1);
-        ');
+        //
     }
 
 }

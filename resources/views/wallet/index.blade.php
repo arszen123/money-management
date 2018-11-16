@@ -27,7 +27,13 @@
                                 <div class="list-group-item list-group-item-action flex-column align-items-start">
                                     <div class="d-flex w-100 justify-content-between">
                                         <h5 class="mb-1">{{ $budget->name }}</h5>
-                                        <small>{{ \Carbon\Carbon::now()->diffInDays(\Carbon\Carbon::createFromFormat('Y-m-d', $budget->to)) }} days left</small>
+                                        <small>
+                                            @if(\Carbon\Carbon::createFromFormat('Y-m-d', $budget->to)->isFuture())
+                                                {{ \Carbon\Carbon::now()->diffInDays(\Carbon\Carbon::createFromFormat('Y-m-d', $budget->to)) }} days left
+                                            @else
+                                                {{ $budget->from }} - {{ $budget->to }}
+                                            @endif
+                                        </small>
                                     </div>
                                     <div class="progress">
                                         <div class="progress-bar" role="progressbar" style="width: {{ calcPercent($budget->starting_balance, $budget->current_balance) }}%" aria-valuenow="{{ calcPercent($budget->starting_balance, $budget->current_balance) }}" aria-valuemin="0" aria-valuemax="100">{{ calcPercent($budget->starting_balance, $budget->current_balance) }}%</div>

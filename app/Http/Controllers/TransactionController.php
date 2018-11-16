@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Middleware\Ajax;
+use App\Model\Category;
 use App\Repository\BudgetRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\TransactionRepository;
 use App\Repository\WalletRepository;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Requests\Transaction as TransactionRequest;
 use Illuminate\Support\Facades\Input;
@@ -16,7 +18,7 @@ class TransactionController extends Controller
 
     public function __construct()
     {
-        $this->middleware(Ajax::class)->except(['index', 'transactionsByBudgetId', 'transactionsByCategoryId', 'transactionsByTag']);
+//        $this->middleware(Ajax::class)->except(['index', 'transactionsByBudgetId', 'transactionsByCategoryId', 'transactionsByTag', 'categoriesForChart']);
         $this->middleware('auth');
     }
 
@@ -65,7 +67,6 @@ class TransactionController extends Controller
         try {
             TransactionRepository::storeTransaction(\Auth::user(), $transaction);
         } catch (\Exception $e) {
-            var_dump($e);
             $success = false;
         }
         return ['success' => $success];
@@ -108,7 +109,6 @@ class TransactionController extends Controller
         try {
             TransactionRepository::updateTransaction(\Auth::user(), $id, $transaction);
         } catch (\Exception $e) {
-            var_dump($e);
             $success = false;
         }
         return ['success' => $success];
@@ -122,7 +122,8 @@ class TransactionController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $success = TransactionRepository::deleteTransaction(\Auth::user(), $id);
+        return ['success' => (bool) $success];
     }
 
     /* Other routes */
@@ -159,8 +160,14 @@ class TransactionController extends Controller
         if (!$category) {
             abort(404);
         }
+        $categories = TransactionRepository::getAmountByCategory(\Auth::user(),$data);
+        $amount = array_filter($categories, function ($c) use ($categoryId) {
+            return $c['id'] == $categoryId ? $c : null;
+        });
+        $amount = array_pop($amount)['amount'];
+        $amountText = $category->type === Category::TYPE_EXPENSE ? 'Spent' : 'Income';
         $transactions = TransactionRepository::getTransactionsToDisplayByCategoryId($categoryId, $data);
-        $title = 'Transactions in "' . $category->name . '" category';
+        $title = "Transactions in \"{$category->name}\" category. ${amountText}: ${amount}";
         $result = ['transactions' => $transactions, 'title' => $title];
         if (!\Request::ajax()) {
             $result = view('transaction.index',
@@ -184,5 +191,29 @@ class TransactionController extends Controller
                 ['transactions' => $transactions, 'title' => $title]);
         }
         return $result;
+    }
+
+    public function categoriesForChart()
+    {
+        $validator = \Validator::make(Input::toArray(), [
+            'from' => 'date',
+            'to' => 'date',
+        ]);
+        $data = $validator->validate();
+        if (empty($data)) {
+            $data['from'] = Carbon::now()->startOfMonth()->format('Y-m-d');
+            $data['to'] = Carbon::now()->endOfMonth()->format('Y-m-d');
+        }
+        $incomeCategories = TransactionRepository::getAmountByCategory1(\Auth::user(), $data, Category::TYPE_INCOME);
+        $incomeCategories = array_map(function ($category) {
+            $category['value'] = (int)$category['value'];
+            return $category;
+        }, $incomeCategories);
+        $expenseCategories = TransactionRepository::getAmountByCategory1(\Auth::user(), $data);
+        $expenseCategories = array_map(function ($category) {
+            $category['value'] = (int)$category['value'];
+            return $category;
+        }, $expenseCategories);
+        return view('transaction.chart', ['incomeCategories' => $incomeCategories, 'expenseCategories' => $expenseCategories, 'data' => $data]);
     }
 }
