@@ -138,6 +138,11 @@ class BudgetRepository
         );
     }
 
+    public static function delete(User $user, int $id)
+    {
+        return \DB::delete('DELETE FROM budget WHERE user_id = :user_id AND id = :id', ['user_id' => $user->id, 'id' => $id]);
+    }
+
     /**
      * Return category ids which are not in the selected budget
      *

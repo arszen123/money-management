@@ -5,8 +5,6 @@
         <div class="row justify-content-center">
             <div class="col-md-12">
                 <div class="card">
-                    <div class="card-header">Wallet</div>
-
                     <div class="card-body" style="padding: 0">
                         <budgets-view :budgets='@json($budgets)'/>
                     </div>

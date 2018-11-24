@@ -29,6 +29,7 @@
         </div>
         <div>
             <input type="submit" class="btn btn-primary"/>
+            <button v-if="categoryId !== null" @click="deleteBudget" class="btn btn-danger">Delete</button>
         </div>
     </form>
 </template>
@@ -96,13 +97,31 @@
                     }
                 })
             },
+            deleteBudget() {
+                axios.delete(`/budget/${this.categoryId}`)
+                .then(() => {
+                    this.$parent.goTo('root')
+                    this.$notify({
+                        group: 'notification',
+                        title: 'Saved!',
+                        text: 'Budget saved successfully!',
+                        type: 'success'
+                    });
+                }).catch(reason => {
+                    this.$notify({
+                        group: 'notification',
+                        title: 'Error!',
+                        text: 'Budget can\'t be deleted!',
+                        type: 'danger'
+                    });
+                })
+            },
             getBudget(id) {
                 axios.get(`/budget/${id}`).then(value => {
                     this.budget = value.data.budget
                 })
             },
-            getCategories()
-            {
+            getCategories() {
                 axios.get('/category?type=2').then(value => {
                     this.categories = value.data.categories;
                 })

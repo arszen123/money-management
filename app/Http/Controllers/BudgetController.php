@@ -97,6 +97,6 @@ class BudgetController extends Controller
      */
     public function destroy($id)
     {
-        //
+        BudgetRepository::delete(\Auth::user(), $id);
     }
 }
